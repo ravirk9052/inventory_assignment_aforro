@@ -2,6 +2,7 @@ import AddIcon from "@mui/icons-material/Add";
 import {
   AccountCircleOutlined,
   CheckBox,
+  CheckBoxOutlineBlank,
   FilterAltOutlined,
 } from "@mui/icons-material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -23,6 +24,9 @@ type InventoryToolbarProps = {
   onAddProduct: () => void;
   onSearchChange: (value: string) => void;
   onTabChange: (tab: InventoryTab) => void;
+  filters: { packaged: boolean; promotions: boolean };
+  onToggleFilter: (type: "packaged" | "promotions") => void;
+  promotionsCount: number;
 };
 
 export const InventoryToolbar = memo(function InventoryToolbar({
@@ -31,6 +35,9 @@ export const InventoryToolbar = memo(function InventoryToolbar({
   onAddProduct,
   onSearchChange,
   onTabChange,
+  filters,
+  onToggleFilter,
+  promotionsCount,
 }: InventoryToolbarProps) {
   return (
     <div className="border-b border-[#e9edf3] bg-white overflow-hidden">
@@ -85,13 +92,28 @@ export const InventoryToolbar = memo(function InventoryToolbar({
 
         {activeTab === "Items added by you" ? (
           <div className="flex items-center gap-4 text-[11px] font-medium text-[#334155] flex-wrap">
-            <button className="flex items-center gap-1">
-              <CheckBox className="!h-4 !w-4 text-[#1555ff]" />
+            <button
+              onClick={() => onToggleFilter("packaged")}
+              className="flex items-center gap-1"
+            >
+              {filters.packaged ? (
+                <CheckBox className="!h-4 !w-4 text-[#1555ff]" />
+              ) : (
+                <CheckBoxOutlineBlank className="!h-4 !w-4 text-[#8996a8]" />
+              )}
               Packaged product
             </button>
-            <button className="flex items-center gap-1">
-              <CheckBox className="!h-4 !w-4 text-[#1555ff]" />
-              Promotions <span className="text-[#738095]">3</span>
+            <button
+              onClick={() => onToggleFilter("promotions")}
+              className="flex items-center gap-1"
+            >
+              {filters.promotions ? (
+                <CheckBox className="!h-4 !w-4 text-[#1555ff]" />
+              ) : (
+                <CheckBoxOutlineBlank className="!h-4 !w-4 text-[#8996a8]" />
+              )}
+              Promotions{" "}
+              <span className="text-[#738095]">{promotionsCount}</span>
             </button>
           </div>
         ) : null}

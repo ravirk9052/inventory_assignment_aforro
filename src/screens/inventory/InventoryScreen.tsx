@@ -183,11 +183,24 @@ export function InventoryScreen() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingRow, setEditingRow] = useState<EditingRow>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    packaged: false,
+    promotions: false,
+  });
 
   const meta = screenMeta[activeTab];
 
+  const promotionsCount = useMemo(() => {
+    return products
+      .map((p) => ({
+        ...p,
+        rows: p.rows.filter((r) => r.actionLabel === "Added by you"),
+      }))
+      .filter((p: any) => p.rows.length > 0 && p.label === "Promotions").length;
+  }, [products]);
+
   const visibleProducts = useMemo(() => {
-    const baseProducts =
+    let baseProducts =
       activeTab === "Items sent for approval"
         ? createApprovalProducts(products, approvals)
         : activeTab === "Items added by you"
@@ -200,6 +213,17 @@ export function InventoryScreen() {
               }))
               .filter((product) => product.rows.length > 0)
           : products;
+
+    if (
+      activeTab === "Items added by you" &&
+      (filters.packaged || filters.promotions)
+    ) {
+      baseProducts = baseProducts.filter((product: any) => {
+        if (filters.packaged && product.label === "Packaged Item") return true;
+        if (filters.promotions && product.label === "Promotions") return true;
+        return false;
+      });
+    }
 
     return baseProducts.filter((product) => {
       const search = searchTerm.trim().toLowerCase();
@@ -233,7 +257,7 @@ export function InventoryScreen() {
 
       return matchesSearch;
     });
-  }, [activeTab, approvals, products, searchTerm]);
+  }, [activeTab, approvals, products, searchTerm, filters]);
 
   const handleAddProduct = useCallback((draft: ProductDraft) => {
     const product = makeProductFromDraft(draft);
@@ -395,6 +419,11 @@ export function InventoryScreen() {
               onSearchChange={setSearchTerm}
               onTabChange={setActiveTab}
               searchTerm={searchTerm}
+              filters={filters}
+              onToggleFilter={(type) =>
+                setFilters((prev) => ({ ...prev, [type]: !prev[type] }))
+              }
+              promotionsCount={promotionsCount}
             />
             <MemoizedProductList
               mode={activeTab}
